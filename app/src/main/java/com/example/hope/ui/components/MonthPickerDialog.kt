@@ -21,8 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
@@ -47,10 +49,10 @@ fun MonthPickerDialog(
                         .fillMaxWidth()
                         .pointerInput(Unit) {
                             detectVerticalDragGestures { _, dragAmount ->
-                                if (dragAmount < 0) { // Vuốt lên để chuyển tháng trước
-                                    selectedMonth = selectedMonth.minusMonths(1)
-                                } else if (dragAmount > 0 && selectedMonth < YearMonth.now()) { // Vuốt xuống để chuyển tháng sau
+                                if (dragAmount < -15 && selectedMonth < YearMonth.now()) { // Vuốt lên để chuyển tháng trước
                                     selectedMonth = selectedMonth.plusMonths(1)
+                                } else if (dragAmount > 15) { // Vuốt xuống để chuyển tháng sau
+                                    selectedMonth = selectedMonth.minusMonths(1)
                                 }
                             }
                         }
@@ -58,19 +60,19 @@ fun MonthPickerDialog(
                     // Tháng liền trước, hiện mờ
                     Text(
                         text = selectedMonth.minusMonths(1).format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = TextStyle(fontSize = 24.sp),
                         color = Color.Gray.copy(alpha = 0.5f)
                     )
                     // Tháng hiện tại
                     Text(
                         text = selectedMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = TextStyle(fontSize = 32.sp),
                         fontWeight = FontWeight.Bold
                     )
                     // Tháng liền sau, hiện mờ
                     Text(
                         text = selectedMonth.plusMonths(1).format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = TextStyle(fontSize = 24.sp),
                         color = Color.Gray.copy(alpha = 0.5f)
                     )
                 }

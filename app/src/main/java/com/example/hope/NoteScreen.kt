@@ -1,13 +1,18 @@
 package com.example.hope
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
@@ -18,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +33,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +44,7 @@ import com.example.hope.ui.components.MonthSelector
 import java.time.LocalDate
 import java.time.YearMonth
 
+@SuppressLint("ReturnFromAwaitPointerEventScope")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NoteScreen(
@@ -49,6 +57,7 @@ fun NoteScreen(
     var isViewingEntry by remember { mutableStateOf(false) }
     var showMonthPicker by remember { mutableStateOf(false) }
 
+    var isMonthChanged by remember { mutableStateOf(false) }
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -64,16 +73,33 @@ fun NoteScreen(
     ) { padding ->
         Column(modifier = Modifier
             .padding(padding)
-            .pointerInput(Unit) { // Vuốt màn hình chung để chuyển tháng
-                detectVerticalDragGestures { _, dragAmount ->
-                    if (dragAmount < 0) { // Vuốt lên để chuyển tháng trước
-                        currentMonth = currentMonth.minusMonths(1)
-                    } else if (dragAmount > 0 && currentMonth < YearMonth.now()) { // Vuốt xuống để chuyển tháng sau
-                        currentMonth = currentMonth.plusMonths(1)
+            .fillMaxHeight()
+            .pointerInput(Unit) {
+                detectVerticalDragGestures(
+                    onVerticalDrag = { change, dragAmount ->
+                        if (!isMonthChanged) { // Kiểm tra nếu chưa thay đổi tháng
+                            if (dragAmount > 0) {
+                                // Vuốt lên - Lùi về tháng trước
+                                if (currentMonth > currentMonth.minusMonths(1)) {
+                                    currentMonth = currentMonth.minusMonths(1)
+                                    isMonthChanged = true // Đánh dấu đã thay đổi tháng
+                                }
+                            } else if (dragAmount < 0) {
+                                // Vuốt xuống - Tiến tới tháng tiếp theo
+                                if (currentMonth < YearMonth.now()) {
+                                    currentMonth = currentMonth.plusMonths(1)
+                                    isMonthChanged = true // Đánh dấu đã thay đổi tháng
+                                }
+                            }
+                        }
+                    },
+                    onDragEnd = {
+                        isMonthChanged = false // Reset lại sau khi kết thúc thao tác vuốt
                     }
-                }
+                )
             }
         ) {
+
             Text(
                 text = "Mood Tracker",
                 style = MaterialTheme.typography.headlineMedium,
@@ -92,17 +118,31 @@ fun NoteScreen(
             Column(
                 modifier = Modifier
                     .padding(padding)
-                    .fillMaxSize()
+                    .fillMaxHeight()
                     .nestedScroll(object : NestedScrollConnection {
                         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                            if (available.y > 0) { // Vuốt xuống
-                                currentMonth = currentMonth.plusMonths(1).coerceAtMost(YearMonth.now())
-                            } else if (available.y < 0) { // Vuốt lên
-                                currentMonth = currentMonth.minusMonths(1)
+                            if (!isMonthChanged) {
+                                if (available.y > 70) { // Vuốt xuống
+                                    if (currentMonth > currentMonth.minusMonths(1)) {
+                                        currentMonth = currentMonth.minusMonths(1)
+                                        isMonthChanged = true // Đánh dấu đã thay đổi tháng
+                                    }
+                                } else if (available.y < -70) { // Vuốt lên
+                                    if (currentMonth < YearMonth.now()) {
+                                        currentMonth = currentMonth.plusMonths(1)
+                                        isMonthChanged = true // Đánh dấu đã thay đổi tháng
+                                    }
+                                }
                             }
                             return Offset.Zero
                         }
+
+                        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                            isMonthChanged = false // Reset lại sau khi kết thúc thao tác vuốt
+                            return Offset.Zero
+                        }
                     })
+
             ) {
                 CalendarView(
                     check = check,
