@@ -1,4 +1,4 @@
-package com.example.hope
+package com.example.hope.mood_tracker.data.database
 
 import android.os.Build
 import androidx.annotation.RequiresApi

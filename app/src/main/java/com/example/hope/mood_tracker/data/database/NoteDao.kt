@@ -1,13 +1,11 @@
-package com.example.hope
+package com.example.hope.mood_tracker.data.database
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDate
 
 @Dao
 interface NoteDao {
@@ -22,5 +20,5 @@ interface NoteDao {
     suspend fun insertNote(note: Note)
 
     @Delete
-    suspend fun deleteNote(noteItem: Note)
+    suspend fun deleteNote(note: Note)
 }

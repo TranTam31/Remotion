@@ -1,9 +1,16 @@
-package com.example.hope
+package com.example.hope.mood_tracker.ui
 
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.hope.mood_tracker.NoteApplication
+import com.example.hope.mood_tracker.data.database.Note
+import com.example.hope.mood_tracker.data.repository.NoteRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -13,10 +20,10 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class NoteViewModel(
-    private val dao: NoteDao
+    private val noteRepository: NoteRepository
 ): ViewModel() {
 
-    private val _notes = dao.getNotes()
+    private val _notes = noteRepository.getAllNotes()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
     @RequiresApi(Build.VERSION_CODES.O)
     private val _state = MutableStateFlow(NoteState())
@@ -51,6 +58,8 @@ class NoteViewModel(
                     isAddingNote = false
                 ) }
             }
+
+            // *lưu vào database
             NoteEvent.SaveNote -> {
                 val content = state.value.content
                 val date = state.value.date
@@ -62,7 +71,7 @@ class NoteViewModel(
                     date = date
                 )
                 viewModelScope.launch {
-                    dao.insertNote(note)
+                    noteRepository.insertNote(note)
                 }
                 _state.update { it.copy(
                     isAddingNote = false,
@@ -75,6 +84,16 @@ class NoteViewModel(
     fun check(date: LocalDate): Boolean {
         // Kiểm tra nếu ngày đã tồn tại trong danh sách _notes
         return _notes.value.any { it.date == date }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as NoteApplication)
+                val noteRepository = application.container.noteRepository
+                NoteViewModel(noteRepository = noteRepository)
+            }
+        }
     }
 
 }
