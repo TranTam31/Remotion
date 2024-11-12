@@ -1,4 +1,4 @@
-package com.example.hope.ui.components
+package com.example.hope.mood_tracker.ui.components
 
 import android.os.Build
 import androidx.annotation.RequiresApi

@@ -1,6 +1,5 @@
-package com.example.hope.ui.theme
+package com.example.hope.mood_tracker.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
