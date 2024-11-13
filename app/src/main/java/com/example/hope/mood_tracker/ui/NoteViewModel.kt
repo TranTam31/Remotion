@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.hope.mood_tracker.NoteApplication
+import com.example.hope.NoteApplication
 import com.example.hope.mood_tracker.data.database.Note
 import com.example.hope.mood_tracker.data.repository.NoteRepository
 import kotlinx.coroutines.flow.MutableStateFlow

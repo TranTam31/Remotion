@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,7 +28,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.hope.mood_tracker.ui.components.CalendarView
 import com.example.hope.mood_tracker.ui.components.JournalEntryInput
@@ -66,7 +64,7 @@ fun NoteScreen(
         }
     ) { padding ->
         Column(modifier = Modifier
-            .padding(padding)
+            .padding()
             .fillMaxHeight()
             .pointerInput(Unit) {
                 detectVerticalDragGestures(
@@ -93,13 +91,6 @@ fun NoteScreen(
                 )
             }
         ) {
-
-            Text(
-                text = "Mood Tracker",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-
             MonthSelector(
                 currentMonth = currentMonth,
                 onPreviousMonth = { if (currentMonth > currentMonth.minusMonths(1)) currentMonth = currentMonth.minusMonths(1) },
