@@ -1,9 +1,8 @@
-package com.example.hope.mood_tracker
+package com.example.hope
 
 import android.app.Application
-import com.example.hope.mood_tracker.data.AppContainer
-import com.example.hope.mood_tracker.data.AppDataContainer
 
+// file này khởi tạo container, là dữ liệu cần dùng trong cả ứng dụng
 class NoteApplication : Application() {
     lateinit var container: AppContainer
 

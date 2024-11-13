@@ -1,4 +1,4 @@
-package com.example.hope.mood_tracker.ui.theme
+package com.example.hope.theme
 
 import androidx.compose.ui.graphics.Color
 

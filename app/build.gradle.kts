@@ -83,4 +83,8 @@ dependencies {
     testImplementation("androidx.room:room-testing:$room_version")
     implementation("androidx.room:room-paging:$room_version")
 
+    // navigation
+    val nav_version = "2.8.0"
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
 }
