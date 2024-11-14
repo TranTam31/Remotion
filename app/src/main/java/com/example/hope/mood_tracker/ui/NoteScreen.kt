@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,8 +43,14 @@ import java.time.YearMonth
 fun NoteScreen(
     state: NoteState,
     onEvent: (NoteEvent) -> Unit,
-    check: (LocalDate) -> Boolean
+    check: (LocalDate) -> Boolean,
+//    syncNotesFromFirestore: () -> Unit
 ) {
+    // Đồng bộ dữ liệu từ Firestore khi vào màn hình (trong LaunchedEffect hoặc side effect)
+//    LaunchedEffect(true) {
+//        syncNotesFromFirestore() // Đồng bộ dữ liệu từ Firestore vào Room
+//    }
+
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val today = LocalDate.now()
     var isViewingEntry by remember { mutableStateOf(false) }

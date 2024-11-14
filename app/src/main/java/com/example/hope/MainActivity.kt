@@ -2,6 +2,7 @@ package com.example.hope
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -9,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,6 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.hope.auth.ui.sign_in.GoogleAuthUiClient
 import com.example.hope.auth.ui.sign_in.SignInScreen
 import com.example.hope.auth.ui.sign_in.SignInViewModel
+import com.example.hope.mood_tracker.ui.NoteViewModel
+import com.example.hope.mood_tracker.ui.NoteViewModel.Companion.Factory
 import com.example.hope.theme.HopeTheme
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
@@ -34,6 +38,7 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +50,7 @@ class MainActivity : ComponentActivity() {
                     composable("sign_in") {
                         val viewModel = viewModel<SignInViewModel>()
                         val state by viewModel.state.collectAsStateWithLifecycle()
-
+                        val noteViewModel: NoteViewModel by viewModels(factoryProducer = { Factory })
                         LaunchedEffect(key1 = Unit) {
                             if(googleAuthUiClient.getSignedInUser() != null) {
                                 navController.navigate("remotion_app")
@@ -66,6 +71,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
 
+                        // nó
                         LaunchedEffect(key1 = state.isSignInSuccessfull) {
                             if(state.isSignInSuccessfull) {
                                 Toast.makeText(
@@ -73,6 +79,7 @@ class MainActivity : ComponentActivity() {
                                     "Sign in successfull",
                                     Toast.LENGTH_LONG
                                 ).show()
+                                noteViewModel.clearRoomDataForNewUser()
                                 navController.navigate("remotion_app")
                                 viewModel.resetState()
                             }

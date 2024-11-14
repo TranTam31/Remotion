@@ -95,6 +95,13 @@ class NoteViewModel(
         return _notes.value.any { it.date == date }
     }
 
+    fun clearRoomDataForNewUser() {
+        viewModelScope.launch {
+            noteRepository.clearRoomDataForNewUser()
+        }
+    }
+
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

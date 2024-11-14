@@ -25,6 +25,6 @@ class AppDataContainer(private val context: Context): AppContainer {
 
 
     override val noteRepository: NoteRepository by lazy {
-        NoteRepositoryImpl(NoteDatabase.getDatabase(context).noteDao, googleAuthUiClient)
+        NoteRepositoryImpl(NoteDatabase.getDatabase(context).noteDao, googleAuthUiClient, context)
     }
 }
