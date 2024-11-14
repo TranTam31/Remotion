@@ -48,6 +48,11 @@ class NoteViewModel(
                     date = event.date
                 ) }
             }
+            is NoteEvent.SetEmotion -> {
+                _state.update { it.copy(
+                    emotion = event.emotion
+                ) }
+            }
             NoteEvent.ShowDialog -> {
                 _state.update { it.copy(
                     isAddingNote = true
@@ -63,19 +68,23 @@ class NoteViewModel(
             NoteEvent.SaveNote -> {
                 val content = state.value.content
                 val date = state.value.date
+                val emotion = state.value.emotion
                 if(content.isBlank()) {
                     return
                 }
                 val note = Note(
+                    userId = noteRepository.userData.userId,
                     content = content,
-                    date = date
+                    date = date,
+                    emotion = emotion
                 )
                 viewModelScope.launch {
                     noteRepository.insertNote(note)
                 }
                 _state.update { it.copy(
                     isAddingNote = false,
-                    content = ""
+                    content = "",
+                    emotion = 0
                 ) }
             }
         }

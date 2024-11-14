@@ -170,12 +170,17 @@ fun NoteScreen(
                             JournalEntryInput(
                                 date = state.date,
                                 content = state.content,
+                                emotion = state.emotion,
                                 onEntrySaved = {
                                     onEvent(NoteEvent.SaveNote)
                                     onEvent(NoteEvent.HideDialog)
                                 },
                                 onContentChange = { newContent ->
                                     onEvent(NoteEvent.SetContent(newContent))
+                                },
+                                onEmotionChange = {
+                                    newEmotion ->
+                                    onEvent(NoteEvent.SetEmotion(newEmotion))
                                 }
                             )
                         }

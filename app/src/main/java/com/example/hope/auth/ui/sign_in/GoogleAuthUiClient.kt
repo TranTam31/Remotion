@@ -76,6 +76,17 @@ class GoogleAuthUiClient(
         )
     }
 
+    fun getCurrentUser(): UserData {
+        val user = auth.currentUser
+            ?: throw IllegalStateException("No user is currently signed in")
+
+        return UserData(
+            userId = user.uid,
+            userName = user.displayName ?: "No Name",
+            profilePictureUrl = user.photoUrl?.toString()
+        )
+    }
+
     private fun buildSignInRequest() : BeginSignInRequest {
         return BeginSignInRequest.Builder()
             .setGoogleIdTokenRequestOptions(

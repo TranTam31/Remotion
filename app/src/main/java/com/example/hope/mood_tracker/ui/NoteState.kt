@@ -9,6 +9,7 @@ import java.time.LocalDate
 data class NoteState constructor(
     val notes: List<Note> = emptyList(),
     val content: String = "",
+    val emotion: Int = 0,
     val isAddingNote: Boolean = false,
     val date: LocalDate = LocalDate.now()
 )

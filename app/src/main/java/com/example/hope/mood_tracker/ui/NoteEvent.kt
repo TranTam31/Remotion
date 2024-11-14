@@ -6,6 +6,7 @@ sealed interface NoteEvent {
     object SaveNote: NoteEvent
     data class SetContent(val content: String): NoteEvent
     data class SetDate(val date: LocalDate): NoteEvent
+    data class SetEmotion(val emotion: Int): NoteEvent
     object ShowDialog: NoteEvent
     object HideDialog: NoteEvent
 }

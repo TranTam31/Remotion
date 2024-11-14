@@ -11,6 +11,8 @@ import java.time.LocalDate
 data class Note constructor(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val userId: String = "",
     val date: LocalDate = LocalDate.now(),
     val content: String = "",
+    val emotion: Int = 0
 )
