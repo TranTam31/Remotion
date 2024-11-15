@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
@@ -38,6 +39,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.hope.auth.ui.sign_in.ProfileApp
+import com.example.hope.auth.ui.sign_in.UserData
 import com.example.hope.mood_tracker.NoteApp
 import com.example.hope.navigation.Destinations
 import com.example.hope.reminder.ReminderApp
@@ -45,7 +48,11 @@ import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun RemotionApp(modifier: Modifier = Modifier) {
+fun RemotionApp(
+    modifier: Modifier = Modifier,
+    userData: UserData?,
+    onSignOut: () -> Unit
+) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -72,7 +79,7 @@ fun RemotionApp(modifier: Modifier = Modifier) {
             topBar = {
                 TopBar(
                     onOpenDrawer = {
-                        // You can toggle the drawer here as needed
+                        DrawerValue.Open
                     }
                 )
             }
@@ -87,6 +94,9 @@ fun RemotionApp(modifier: Modifier = Modifier) {
                 }
                 composable(Destinations.REMINDER_APP) {
                     ReminderApp() // ReminderApp will be shown here
+                }
+                composable(Destinations.PROFILE_APP) {
+                    ProfileApp(userData = userData, onSignOut = onSignOut) // ReminderApp will be shown here
                 }
             }
         }
@@ -105,6 +115,24 @@ fun DrawableContent(
     )
     HorizontalDivider()
     Spacer(modifier = Modifier.height(4.dp).padding(top = 16.dp))
+
+    NavigationDrawerItem(
+        icon = {
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = null,
+                modifier = Modifier.padding(start = 8.dp, end = 2.dp).size(20.dp)
+            )
+        },
+        label = {
+            Text(text = "Profile", fontSize = 18.sp)
+        },
+        selected = selectedDestination == Destinations.PROFILE_APP,  // Kiểm tra xem mục này có được chọn không
+        onClick = {
+            onDestinationSelected(Destinations.PROFILE_APP)
+        }
+    )
+    Spacer(modifier = Modifier.height(4.dp))
 
     // Mood Tracker item
     NavigationDrawerItem(

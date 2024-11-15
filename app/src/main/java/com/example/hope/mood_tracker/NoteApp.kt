@@ -25,6 +25,7 @@ fun NoteApp(modifier: Modifier = Modifier) {
             val noteViewModel: NoteViewModel =
                 viewModel(factory = NoteViewModel.Factory)
             val state by noteViewModel.state.collectAsState()
+//            NoteScreen(state = state, onEvent = noteViewModel::onEvent, noteViewModel::check, noteViewModel::syncNotesFromFirestore)
             NoteScreen(state = state, onEvent = noteViewModel::onEvent, noteViewModel::check)
         }
     }

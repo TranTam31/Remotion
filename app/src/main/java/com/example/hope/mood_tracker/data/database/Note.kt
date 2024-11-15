@@ -9,8 +9,11 @@ import java.time.LocalDate
 @Entity
 @RequiresApi(Build.VERSION_CODES.O)
 data class Note constructor(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+//    @PrimaryKey(autoGenerate = true)
+//    val id: Int = 0,
+    val userId: String = "",
+    @PrimaryKey
     val date: LocalDate = LocalDate.now(),
     val content: String = "",
+    val emotion: Int = 0
 )

@@ -3,12 +3,14 @@ package com.example.hope.mood_tracker.ui.components
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,8 +26,10 @@ import java.util.Locale
 fun JournalEntryInput(
     date: LocalDate,
     content: String,
+    emotion: Int,
     onEntrySaved: (String) -> Unit,
-    onContentChange: (String) -> Unit // Thêm callback để thay đổi nội dung
+    onContentChange: (String) -> Unit,
+    onEmotionChange: (Int) -> Unit
 ) {
     Column {
         Text(
@@ -33,6 +37,24 @@ fun JournalEntryInput(
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold
         )
+//        for (emotionHere in 1..5) {
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                RadioButton(
+//                    selected = emotion == emotion,  // Kiểm tra xem đây có phải lựa chọn hiện tại không
+//                    onClick = { selectedMood = emotion },  // Khi người dùng click, thay đổi giá trị của selectedMood
+//                )
+//            }
+//        }
+        for (emotionHere in 1..5) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = emotion == emotionHere,  // Kiểm tra xem đây có phải lựa chọn hiện tại không
+                    onClick = { onEmotionChange(emotionHere) },  // Khi người dùng click, thay đổi giá trị cảm xúc
+                )
+                Text(text = "Cảm xúc $emotionHere")
+            }
+        }
+
         OutlinedTextField(
             value = content,
             onValueChange = { onContentChange(it) }, // Gọi hàm để thay đổi nội dung
