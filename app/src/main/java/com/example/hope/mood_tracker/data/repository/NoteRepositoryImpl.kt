@@ -14,37 +14,65 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class NoteRepositoryImpl(
     private val noteDao: NoteDao,
-    googleAuthUiClient: GoogleAuthUiClient,
+    override val googleAuthUiClient: GoogleAuthUiClient,
     private val context: Context
 ) : NoteRepository {
-    override val userData: UserData = googleAuthUiClient.getCurrentUser()
+
+    private val offlineQueue: ConcurrentLinkedQueue<OfflineAction> = ConcurrentLinkedQueue()
+
+    // Định nghĩa OfflineAction để lưu thông tin thao tác
+    data class OfflineAction(
+        val actionType: String, // "ADD", "UPDATE", "DELETE"
+        val note: Note
+    )
+
+
+    // chỗ này cập nhật so với code cũ, important nhá
+    override val userData: UserData
+        get() = googleAuthUiClient.getCurrentUser()
+
+
     private val firestore = FirebaseFirestore.getInstance()
 
     override fun getAllNotes(): Flow<List<Note>> {
+        Log.d("UserData trong Repo", "${userData}")
         return noteDao.getNotes(userId = userData.userId)
     }
 
     override suspend fun insertNote(note: Note) {
         // Lưu ghi chú vào Room
-//        val newId = noteDao.insertNote(note)
-//        val insertedNote = note.copy(id = newId.toInt())
         noteDao.insertNote(note)
 
         // Kiểm tra kết nối internet và đồng bộ lên Firestore nếu có kết nối
         if (NetworkUtils.isNetworkAvailable(context = context)) {
             syncNoteToFirestore(note) // Sử dụng bản ghi đã có id hợp lệ
+        } else {
+            offlineQueue.add(OfflineAction("ADD", note))
+        }
+    }
+
+    override suspend fun updateNote(note: Note) {
+        noteDao.updateNote(note)
+
+        if (NetworkUtils.isNetworkAvailable(context = context)) {
+            syncNoteToFirestore(note)
+        } else {
+            offlineQueue.add(OfflineAction("UPDATE", note))
         }
     }
 
     override suspend fun deleteNote(note: Note) {
-        // Xóa ghi chú trong Room
         noteDao.deleteNote(note)
-
-        // Xóa ghi chú khỏi Firestore
-        deleteNoteFromFirestore(note)
+        // phải thêm logic là xóa note nào nhé
+        if (NetworkUtils.isNetworkAvailable(context = context)) {
+            firestore.collection("notes").document().delete()
+        } else {
+            offlineQueue.add(OfflineAction("DELETE", note))
+        }
     }
 
     // Đồng bộ ghi chú từ Room lên Firestore
@@ -83,6 +111,7 @@ class NoteRepositoryImpl(
                 val emotion = document.getLong("emotion")?.toInt() ?: 0
 
                 val date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                Log.d("FirestoreData", "Document ID: ${document.id}, userId: $userId, date: $date, content: $content, emotion: $emotion")
                 // Tạo một `Note` mới mà không có `id`
                 Note(
                     userId = userId,
@@ -101,19 +130,32 @@ class NoteRepositoryImpl(
         }
     }
 
-
-
     // Xóa ghi chú từ Firestore
-    private suspend fun deleteNoteFromFirestore(note: Note) {
-        try {
-            firestore.collection("notes")
-//                .document(note.id.toString())
-                .document()
-                .delete()
-                .await()
-        } catch (e: Exception) {
-            e.printStackTrace()
+//    private suspend fun deleteNoteFromFirestore(note: Note) {
+//        try {
+//            firestore.collection("notes")
+////                .document(note.id.toString())
+//                .document()
+//                .delete()
+//                .await()
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
+//    }
+    override suspend fun syncOfflineQueue() {
+        while (offlineQueue.isNotEmpty()) {
+            val action = offlineQueue.poll() // Lấy và xóa phần tử đầu tiên trong hàng đợi
+
+            action?.let {
+                when (it.actionType) {
+                    "ADD" -> syncNoteToFirestore(it.note)
+                    "UPDATE" -> firestore.collection("notes").document().set(it.note)
+                    "DELETE" -> firestore.collection("notes").document().delete()
+                    else -> {}
+                }
+            }
         }
+        Log.d("SyncOff", "Hoạt động")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -121,5 +163,6 @@ class NoteRepositoryImpl(
         Log.d("ClearFunc", "Nó có hoạt động không?")
         noteDao.deleteAllNotes()  // Xóa tất cả ghi chú trong Room
         syncNotesFromFirestore()  // Đồng bộ lại dữ liệu từ Firestore
+        offlineQueue.clear()
     }
 }

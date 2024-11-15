@@ -3,6 +3,7 @@ package com.example.hope.auth.ui.sign_in
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.util.Log
 import com.example.hope.R
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
@@ -38,6 +39,8 @@ class GoogleAuthUiClient(
         val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
         return try {
             val user = auth.signInWithCredential(googleCredentials).await().user
+            auth.currentUser?.reload()?.await()
+            Log.d("UserData trong Google Auth", "${user?.uid}")
             SignInResult(
                 data = user?.run {
                     UserData(
@@ -57,6 +60,7 @@ class GoogleAuthUiClient(
             )
         }
     }
+
 
     suspend fun signOut() {
         try {
@@ -79,6 +83,7 @@ class GoogleAuthUiClient(
     fun getCurrentUser(): UserData {
         val user = auth.currentUser
             ?: throw IllegalStateException("No user is currently signed in")
+        Log.d("UserData trong hàm getCur", user.uid)
 
         return UserData(
             userId = user.uid,

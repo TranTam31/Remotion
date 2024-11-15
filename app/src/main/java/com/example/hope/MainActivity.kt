@@ -1,5 +1,7 @@
 package com.example.hope
 
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -23,8 +25,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.hope.auth.ui.sign_in.GoogleAuthUiClient
 import com.example.hope.auth.ui.sign_in.SignInScreen
 import com.example.hope.auth.ui.sign_in.SignInViewModel
+import com.example.hope.mood_tracker.data.repository.NoteRepository
+import com.example.hope.mood_tracker.data.repository.NoteRepositoryImpl
 import com.example.hope.mood_tracker.ui.NoteViewModel
 import com.example.hope.mood_tracker.ui.NoteViewModel.Companion.Factory
+import com.example.hope.mood_tracker.utils.NetworkChangeReceiver
 import com.example.hope.theme.HopeTheme
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
@@ -38,6 +43,7 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    private lateinit var networkChangeReceiver: NetworkChangeReceiver
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +57,9 @@ class MainActivity : ComponentActivity() {
                         val viewModel = viewModel<SignInViewModel>()
                         val state by viewModel.state.collectAsStateWithLifecycle()
                         val noteViewModel: NoteViewModel by viewModels(factoryProducer = { Factory })
+//                        networkChangeReceiver = NetworkChangeReceiver { noteViewModel.syncOfflineQueue() }
+//                        val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+//                        registerReceiver(networkChangeReceiver, intentFilter)
                         LaunchedEffect(key1 = Unit) {
                             if(googleAuthUiClient.getSignedInUser() != null) {
                                 navController.navigate("remotion_app")
@@ -82,6 +91,11 @@ class MainActivity : ComponentActivity() {
                                 noteViewModel.clearRoomDataForNewUser()
                                 navController.navigate("remotion_app")
                                 viewModel.resetState()
+
+                                // phần xử lý đồng bộ
+                                networkChangeReceiver = NetworkChangeReceiver { noteViewModel.syncOfflineQueue() }
+                                val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+                                registerReceiver(networkChangeReceiver, intentFilter)
                             }
                         }
 
@@ -118,4 +132,10 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    override fun onDestroy() {
+        super.onDestroy()
+        // Hủy đăng ký BroadcastReceiver khi Activity bị hủy
+        unregisterReceiver(networkChangeReceiver)
+    }
+
 }

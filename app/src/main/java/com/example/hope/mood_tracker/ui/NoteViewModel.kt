@@ -101,6 +101,12 @@ class NoteViewModel(
         }
     }
 
+    fun syncOfflineQueue() {
+        viewModelScope.launch {
+            noteRepository.syncOfflineQueue()
+        }
+    }
+
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
