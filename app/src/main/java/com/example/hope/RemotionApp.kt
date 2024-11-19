@@ -10,16 +10,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.DrawerState
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,19 +38,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.hope.auth.ui.sign_in.ProfileApp
 import com.example.hope.auth.ui.sign_in.UserData
+import com.example.hope.other.ui.InfoScreen
+import com.example.hope.other.ui.InstructScreen
+import com.example.hope.other.ui.SettingScreen
 import com.example.hope.mood_tracker.NoteApp
 import com.example.hope.navigation.Destinations
 import com.example.hope.reminder.ReminderApp
 import kotlinx.coroutines.launch
+
+
+data class BottomNavItem(
+    val title: String,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
+    val destination: String
+)
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -60,10 +77,30 @@ fun RemotionApp(
     // Để lưu trạng thái mục đã chọn
     var selectedDestination by remember { mutableStateOf(Destinations.NOTE_APP) }
 
+    val items = listOf(
+        BottomNavItem(
+            title = "Tracker",
+            selectedIcon = Icons.Filled.Favorite,
+            unselectedIcon = Icons.Outlined.Favorite,
+            destination = Destinations.NOTE_APP
+        ),
+        BottomNavItem(
+            title = "Reminder",
+            selectedIcon = Icons.Filled.Menu,
+            unselectedIcon = Icons.Outlined.Menu,
+            destination = Destinations.REMINDER_APP
+        ),
+        BottomNavItem(
+            title = "Setting",
+            selectedIcon = Icons.Filled.Settings,
+            unselectedIcon = Icons.Outlined.Settings,
+            destination = Destinations.SETTING_SCREEN
+        ),
+    )
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(modifier = Modifier.width(LocalConfiguration.current.screenWidthDp.dp*4/5)) {
+            ModalDrawerSheet(modifier = Modifier.width(LocalConfiguration.current.screenWidthDp.dp*3/4)) {
                 DrawableContent(
                     selectedDestination = selectedDestination,
                     onDestinationSelected = { destination ->
@@ -79,9 +116,41 @@ fun RemotionApp(
             topBar = {
                 TopBar(
                     onOpenDrawer = {
-                        DrawerValue.Open
+                        scope.launch {
+                            drawerState.apply {
+                                if (isClosed) open() else close()
+                            }
+                        }
+                    },
+                    onClickAccount = {
+                        selectedDestination = Destinations.PROFILE_APP
+                        navController.navigate(Destinations.PROFILE_APP)
                     }
                 )
+            },
+            bottomBar = {
+                NavigationBar {
+                    items.forEachIndexed{index, item ->
+                        NavigationBarItem(
+                            selected = selectedDestination == item.destination,
+                            onClick = {
+                                selectedDestination = item.destination
+                                navController.navigate(item.destination)
+                            },
+                            alwaysShowLabel = false,
+                            label = {
+                                Text(text = item.title)
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if(selectedDestination == item.destination) item.selectedIcon
+                                    else item.unselectedIcon,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                    }
+                }
             }
         ) { padding ->
             NavHost(
@@ -96,7 +165,16 @@ fun RemotionApp(
                     ReminderApp() // ReminderApp will be shown here
                 }
                 composable(Destinations.PROFILE_APP) {
-                    ProfileApp(userData = userData, onSignOut = onSignOut) // ReminderApp will be shown here
+                    ProfileApp(userData = userData, onSignOut = onSignOut)
+                }
+                composable(Destinations.INFO_SCREEN) {
+                    InfoScreen()
+                }
+                composable(Destinations.SETTING_SCREEN) {
+                    SettingScreen()
+                }
+                composable(Destinations.INSTRUCT_SCREEN) {
+                    InstructScreen()
                 }
             }
         }
@@ -119,62 +197,46 @@ fun DrawableContent(
     NavigationDrawerItem(
         icon = {
             Icon(
-                imageVector = Icons.Default.AccountCircle,
+                imageVector = Icons.Default.Info,
                 contentDescription = null,
-                modifier = Modifier.padding(start = 8.dp, end = 2.dp).size(20.dp)
+                modifier = Modifier.padding(start = 10.dp, end = 2.dp).size(25.dp)
             )
         },
         label = {
-            Text(text = "Profile", fontSize = 18.sp)
+            Text(text = "About us", fontSize = 20.sp)
         },
-        selected = selectedDestination == Destinations.PROFILE_APP,  // Kiểm tra xem mục này có được chọn không
+        selected = selectedDestination == Destinations.INFO_SCREEN,  // Kiểm tra xem mục này có được chọn không
         onClick = {
-            onDestinationSelected(Destinations.PROFILE_APP)
+            onDestinationSelected(Destinations.INFO_SCREEN)
         }
     )
     Spacer(modifier = Modifier.height(4.dp))
 
-    // Mood Tracker item
     NavigationDrawerItem(
         icon = {
             Icon(
-                imageVector = Icons.Default.Favorite,
+                imageVector = Icons.Default.MailOutline,
                 contentDescription = null,
-                modifier = Modifier.padding(start = 8.dp, end = 2.dp).size(20.dp)
+                modifier = Modifier.padding(start = 10.dp, end = 2.dp).size(25.dp)
             )
         },
         label = {
-            Text(text = "Mood Tracker", fontSize = 18.sp)
+            Text(text = "How to use", fontSize = 20.sp)
         },
-        selected = selectedDestination == Destinations.NOTE_APP,  // Kiểm tra xem mục này có được chọn không
+        selected = selectedDestination == Destinations.INSTRUCT_SCREEN,  // Kiểm tra xem mục này có được chọn không
         onClick = {
-            onDestinationSelected(Destinations.NOTE_APP)
+            onDestinationSelected(Destinations.INSTRUCT_SCREEN)
         }
     )
-    Spacer(modifier = Modifier.height(4.dp))
 
-    // Reminder item
-    NavigationDrawerItem(
-        icon = {
-            Icon(
-                imageVector = Icons.Default.DateRange,
-                contentDescription = null,
-                modifier = Modifier.padding(start = 8.dp, end = 2.dp).size(20.dp)
-            )
-        },
-        label = {
-            Text(text = "Reminder", fontSize = 18.sp)
-        },
-        selected = selectedDestination == Destinations.REMINDER_APP,  // Kiểm tra xem mục này có được chọn không
-        onClick = {
-            onDestinationSelected(Destinations.REMINDER_APP)
-        }
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(onOpenDrawer: () -> Unit) {
+fun TopBar(
+    onOpenDrawer: () -> Unit,
+    onClickAccount: () -> Unit
+) {
     TopAppBar(
         navigationIcon = {
             Icon(
@@ -186,6 +248,18 @@ fun TopBar(onOpenDrawer: () -> Unit) {
                     .clickable { onOpenDrawer() }
             )
         },
-        title = { Text(text = "Have a nice day") }
+        title = { Text(text = "Have a nice day") },
+        actions = {
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(start = 8.dp, end = 16.dp)
+                    .size(30.dp)
+                    .clickable {
+                        onClickAccount()
+                    }
+            )
+        }
     )
 }
