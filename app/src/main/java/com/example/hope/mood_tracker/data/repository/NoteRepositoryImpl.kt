@@ -30,7 +30,6 @@ class NoteRepositoryImpl(
         val note: Note
     )
 
-
     // chỗ này cập nhật so với code cũ, important nhá
     override val userData: UserData
         get() = googleAuthUiClient.getCurrentUser()
@@ -49,7 +48,7 @@ class NoteRepositoryImpl(
 
         // Kiểm tra kết nối internet và đồng bộ lên Firestore nếu có kết nối
         if (NetworkUtils.isNetworkAvailable(context = context)) {
-            syncNoteToFirestore(note) // Sử dụng bản ghi đã có id hợp lệ
+            addNoteFirestore(note) // Sử dụng bản ghi đã có id hợp lệ
         } else {
             offlineQueue.add(OfflineAction("ADD", note))
         }
@@ -57,9 +56,10 @@ class NoteRepositoryImpl(
 
     override suspend fun updateNote(note: Note) {
         noteDao.updateNote(note)
+        Log.d("update func", "nó có vào không?")
 
         if (NetworkUtils.isNetworkAvailable(context = context)) {
-            syncNoteToFirestore(note)
+            updateNoteFirestore(note)
         } else {
             offlineQueue.add(OfflineAction("UPDATE", note))
         }
@@ -69,14 +69,14 @@ class NoteRepositoryImpl(
         noteDao.deleteNote(note)
         // phải thêm logic là xóa note nào nhé
         if (NetworkUtils.isNetworkAvailable(context = context)) {
-            firestore.collection("notes").document().delete()
+            deleteNoteFirestore(note)
         } else {
             offlineQueue.add(OfflineAction("DELETE", note))
         }
     }
 
-    // Đồng bộ ghi chú từ Room lên Firestore
-    private suspend fun syncNoteToFirestore(note: Note) {
+    // Đồng bộ ghi chú từ Room lên Firestore, cái này chỉ được cho mỗi tạo và update thôi
+    private suspend fun addNoteFirestore(note: Note) {
         try {
             val noteMap = mapOf(
                 "userId" to note.userId,
@@ -84,7 +84,6 @@ class NoteRepositoryImpl(
                 "content" to note.content,
                 "emotion" to note.emotion
             )
-
             firestore.collection("notes")
                 .document()
                 .set(noteMap)
@@ -93,6 +92,67 @@ class NoteRepositoryImpl(
             // Xử lý lỗi nếu có
             e.printStackTrace()
         }
+    }
+
+    private suspend fun deleteNoteFirestore(note: Note) {
+        val dateStr = note.date.toString() // phải chuyển sang String cho bên Firebase
+        try {
+            firestore.collection("notes")
+                .whereEqualTo("userId", note.userId)
+                .whereEqualTo("date", dateStr)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        // Xóa document đầu tiên tìm thấy, vì mỗi ngày chỉ có 1 note của user
+                        val document = documents.documents[0]
+                        firestore.collection("notes").document(document.id).delete()
+                        Log.e("Firestore", "Xóa rồi")
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Xử lý lỗi khi truy vấn hoặc xóa
+                    Log.e("Firestore", "Error deleting document: ${exception.message}")
+                }
+                .await()
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private suspend fun updateNoteFirestore(note: Note) {
+        firestore.collection("notes")
+            .whereEqualTo("userId", note.userId)
+            .whereEqualTo("date", note.date.toString())
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    // Lấy document đầu tiên tìm thấy
+                    val document = documents.documents[0]
+                    firestore.collection("notes")
+                        .document(document.id)
+                        .update(
+                            mapOf(
+                                "content" to note.content,
+                                "emotion" to note.emotion,
+                                "date" to note.date.toString(),
+                                "userId" to note.userId
+                            )
+                        )
+                        .addOnSuccessListener {
+                            Log.d("Firestore", "Document successfully updated")
+                        }
+                        .addOnFailureListener { exception ->
+                            Log.e("Firestore", "Error updating document: ${exception.message}")
+                        }
+                } else {
+                    Log.e("Firestore", "No document found for the given date and userId")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore", "Error finding document: ${exception.message}")
+            }
+            .await()
     }
 
     // Đồng bộ ghi chú từ Firestore về Room (chỉ lấy ghi chú của userId hiện tại)
@@ -130,27 +190,16 @@ class NoteRepositoryImpl(
         }
     }
 
-    // Xóa ghi chú từ Firestore
-//    private suspend fun deleteNoteFromFirestore(note: Note) {
-//        try {
-//            firestore.collection("notes")
-////                .document(note.id.toString())
-//                .document()
-//                .delete()
-//                .await()
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-//    }
+    // queue này lưu lại các hành động
     override suspend fun syncOfflineQueue() {
         while (offlineQueue.isNotEmpty()) {
             val action = offlineQueue.poll() // Lấy và xóa phần tử đầu tiên trong hàng đợi
 
             action?.let {
                 when (it.actionType) {
-                    "ADD" -> syncNoteToFirestore(it.note)
-                    "UPDATE" -> firestore.collection("notes").document().set(it.note)
-                    "DELETE" -> firestore.collection("notes").document().delete()
+                    "ADD" -> addNoteFirestore(it.note)
+                    "UPDATE" -> updateNoteFirestore(it.note)
+                    "DELETE" -> deleteNoteFirestore(it.note)
                     else -> {}
                 }
             }
@@ -163,6 +212,5 @@ class NoteRepositoryImpl(
         Log.d("ClearFunc", "Nó có hoạt động không?")
         noteDao.deleteAllNotes()  // Xóa tất cả ghi chú trong Room
         syncNotesFromFirestore()  // Đồng bộ lại dữ liệu từ Firestore
-        offlineQueue.clear()
     }
 }

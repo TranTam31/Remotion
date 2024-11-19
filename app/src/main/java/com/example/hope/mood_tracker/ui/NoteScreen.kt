@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,22 +42,24 @@ import java.time.YearMonth
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NoteScreen(
-    state: NoteState,
-    onEvent: (NoteEvent) -> Unit,
-    check: (LocalDate) -> Boolean,
-//    syncNotesFromFirestore: () -> Unit
+//    state: NoteState,
+//    onEvent: (NoteEvent) -> Unit,
+//    check: (LocalDate) -> Boolean,
+    noteViewModel: NoteViewModel
 ) {
-    // Đồng bộ dữ liệu từ Firestore khi vào màn hình (trong LaunchedEffect hoặc side effect)
-//    LaunchedEffect(true) {
-//        syncNotesFromFirestore() // Đồng bộ dữ liệu từ Firestore vào Room
-//    }
+    val state: NoteState by noteViewModel.state.collectAsState()
+    val onEvent = noteViewModel::onEvent
+    val check = noteViewModel::check
+    val getNoteByDate = noteViewModel::getNoteByDate
 
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val today = LocalDate.now()
     var isViewingEntry by remember { mutableStateOf(false) }
     var showMonthPicker by remember { mutableStateOf(false) }
+    var isEditingNote by remember { mutableStateOf(false) }
 
     var isMonthChanged by remember { mutableStateOf(false) }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -134,7 +137,6 @@ fun NoteScreen(
                             return Offset.Zero
                         }
                     })
-
             ) {
                 CalendarView(
                     check = check,
@@ -163,38 +165,78 @@ fun NoteScreen(
 
             // Hộp thoại cho việc thêm/xem nhật ký
             if (state.isAddingNote) {
+                val note = getNoteByDate(state.date)
                 AlertDialog(
                     onDismissRequest = { onEvent(NoteEvent.HideDialog) },
                     title = {
-                        Text(text = if (isViewingEntry) "Xem nhật ký" else "Thêm nhật ký")
+                        Text(text = if (isViewingEntry && !isEditingNote) "Xem nhật ký"
+                                    else if(!isEditingNote) "Thêm nhật ký"
+                                    else "Chỉnh sửa nhật ký"
+                        )
                     },
                     text = {
-                        if (isViewingEntry) {
-//                            val entry = check(today)
-//                            val noteText = state.content ?: ""
-                            Text(text = "Đã có note nhé")
+                        if (isViewingEntry && !isEditingNote) {
+                            // Chế độ xem nhật ký
+                            note?.content?.let { Text(text = it) }
                         } else {
+                            // Chế độ thêm hoặc chỉnh sửa nhật ký
                             JournalEntryInput(
                                 date = state.date,
                                 content = state.content,
                                 emotion = state.emotion,
                                 onEntrySaved = {
-                                    onEvent(NoteEvent.SaveNote)
+                                    if (!isEditingNote) {
+                                        onEvent(NoteEvent.SaveNote)
+                                    } else {
+                                        // ***Lưu ý chỗ này: Cập nhật note trước khi gửi vào sự kiện UpdateNote
+                                        note?.let {
+                                            val updatedNote = it.copy(
+                                                content = state.content,
+                                                emotion = state.emotion
+                                            )
+                                            onEvent(NoteEvent.UpdateNote(updatedNote))
+                                        }
+                                    }
                                     onEvent(NoteEvent.HideDialog)
+                                    isEditingNote = false
                                 },
                                 onContentChange = { newContent ->
                                     onEvent(NoteEvent.SetContent(newContent))
                                 },
-                                onEmotionChange = {
-                                    newEmotion ->
+                                onEmotionChange = { newEmotion ->
                                     onEvent(NoteEvent.SetEmotion(newEmotion))
                                 }
                             )
                         }
                     },
                     confirmButton = {
-                        TextButton(onClick = { onEvent(NoteEvent.HideDialog) }) {
+                        TextButton(onClick = {
+                            onEvent(NoteEvent.HideDialog)
+                            isEditingNote = false
+                        }) {
                             Text("Đóng")
+                        }
+                    },
+                    dismissButton = {
+                        if (isViewingEntry && !isEditingNote) {
+                            TextButton(onClick = {
+                                // Thay đổi sang chế độ chỉnh sửa
+                                isEditingNote = true
+                                if (note != null) {
+                                    onEvent(NoteEvent.SetContent(note.content))
+                                    onEvent(NoteEvent.SetEmotion(note.emotion))
+                                } // Đặt nội dung hiện tại cho chỉnh sửa
+                            }) {
+                                Text("Sửa")
+                            }
+
+                            TextButton(onClick = {
+                                // Xóa ghi chú
+                                note?.let { NoteEvent.DeleteNote(it) }?.let { onEvent(it) }
+                                onEvent(NoteEvent.HideDialog)
+                            }) {
+                                Text("Xóa")
+                            }
                         }
                     }
                 )

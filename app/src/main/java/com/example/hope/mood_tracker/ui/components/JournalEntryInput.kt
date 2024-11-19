@@ -27,7 +27,7 @@ fun JournalEntryInput(
     date: LocalDate,
     content: String,
     emotion: Int,
-    onEntrySaved: (String) -> Unit,
+    onEntrySaved: () -> Unit,
     onContentChange: (String) -> Unit,
     onEmotionChange: (Int) -> Unit
 ) {
@@ -37,14 +37,6 @@ fun JournalEntryInput(
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold
         )
-//        for (emotionHere in 1..5) {
-//            Row(verticalAlignment = Alignment.CenterVertically) {
-//                RadioButton(
-//                    selected = emotion == emotion,  // Kiểm tra xem đây có phải lựa chọn hiện tại không
-//                    onClick = { selectedMood = emotion },  // Khi người dùng click, thay đổi giá trị của selectedMood
-//                )
-//            }
-//        }
         for (emotionHere in 1..5) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(
@@ -64,7 +56,7 @@ fun JournalEntryInput(
         Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = {
-                onEntrySaved(content)
+                onEntrySaved()
                 onContentChange("") // Reset lại `content` khi lưu
             },
             modifier = Modifier.align(Alignment.End)

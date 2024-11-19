@@ -4,7 +4,6 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -44,11 +43,19 @@ class MainActivity : ComponentActivity() {
     }
 
     private lateinit var networkChangeReceiver: NetworkChangeReceiver
+    private val noteViewModel: NoteViewModel by viewModels(factoryProducer = { Factory })
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        if (googleAuthUiClient.getSignedInUser() != null) {
+            networkChangeReceiver = NetworkChangeReceiver { noteViewModel.syncOfflineQueue() }
+            val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+            registerReceiver(networkChangeReceiver, intentFilter)
+        }
+
         setContent {
             HopeTheme {
                 val navController = rememberNavController()
@@ -56,10 +63,8 @@ class MainActivity : ComponentActivity() {
                     composable("sign_in") {
                         val viewModel = viewModel<SignInViewModel>()
                         val state by viewModel.state.collectAsStateWithLifecycle()
-                        val noteViewModel: NoteViewModel by viewModels(factoryProducer = { Factory })
-//                        networkChangeReceiver = NetworkChangeReceiver { noteViewModel.syncOfflineQueue() }
-//                        val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-//                        registerReceiver(networkChangeReceiver, intentFilter)
+                        // hình như phải để lên trên này???
+
                         LaunchedEffect(key1 = Unit) {
                             if(googleAuthUiClient.getSignedInUser() != null) {
                                 navController.navigate("remotion_app")
@@ -91,11 +96,9 @@ class MainActivity : ComponentActivity() {
                                 noteViewModel.clearRoomDataForNewUser()
                                 navController.navigate("remotion_app")
                                 viewModel.resetState()
-
-                                // phần xử lý đồng bộ
-                                networkChangeReceiver = NetworkChangeReceiver { noteViewModel.syncOfflineQueue() }
-                                val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-                                registerReceiver(networkChangeReceiver, intentFilter)
+                                navController.navigate("remotion_app") {
+                                    launchSingleTop = true // Tránh điều hướng trùng lặp
+                                }
                             }
                         }
 
@@ -139,3 +142,99 @@ class MainActivity : ComponentActivity() {
     }
 
 }
+
+//class MainActivity : ComponentActivity() {
+//
+//    private val googleAuthUiClient by lazy {
+//        GoogleAuthUiClient(
+//            context = applicationContext,
+//            oneTapClient = Identity.getSignInClient(applicationContext)
+//        )
+//    }
+//
+//    private lateinit var networkChangeReceiver: NetworkChangeReceiver
+//    private val noteViewModel: NoteViewModel by viewModels(factoryProducer = { NoteViewModel.Factory })
+//
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        enableEdgeToEdge()
+//
+//        // Đăng ký NetworkChangeReceiver
+//        networkChangeReceiver = NetworkChangeReceiver { noteViewModel.syncOfflineQueue() }
+//        val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+//        registerReceiver(networkChangeReceiver, intentFilter)
+//
+//        setContent {
+//            HopeTheme {
+//                val navController = rememberNavController()
+//                NavHost(navController = navController, startDestination = "sign_in") {
+//                    composable("sign_in") {
+//                        val viewModel = viewModel<SignInViewModel>()
+//                        val state by viewModel.state.collectAsStateWithLifecycle()
+//
+//                        val launcher = rememberLauncherForActivityResult(
+//                            contract = ActivityResultContracts.StartIntentSenderForResult(),
+//                            onResult = { result ->
+//                                if (result.resultCode == RESULT_OK) {
+//                                    lifecycleScope.launch {
+//                                        val signInResult = googleAuthUiClient.signInWithIntent(
+//                                            intent = result.data ?: return@launch
+//                                        )
+//                                        viewModel.onSignInResult(signInResult)
+//                                    }
+//                                }
+//                            }
+//                        )
+//
+//                        LaunchedEffect(state.isSignInSuccessfull) {
+//                            if (state.isSignInSuccessfull) {
+//                                Toast.makeText(applicationContext, "Sign in successfull", Toast.LENGTH_LONG).show()
+//                                noteViewModel.clearRoomDataForNewUser()
+//                                viewModel.resetState()
+//                                navController.navigate("remotion_app") {
+//                                    launchSingleTop = true
+//                                }
+//                            }
+//                        }
+//
+//                        SignInScreen(
+//                            state = state,
+//                            onSignInClick = {
+//                                lifecycleScope.launch {
+//                                    val signInIntentSender = googleAuthUiClient.signIn()
+//                                    launcher.launch(
+//                                        IntentSenderRequest.Builder(
+//                                            signInIntentSender ?: return@launch
+//                                        ).build()
+//                                    )
+//                                }
+//                            }
+//                        )
+//                    }
+//                    composable("remotion_app") {
+//                        RemotionApp(
+//                            userData = googleAuthUiClient.getSignedInUser(),
+//                            onSignOut = {
+//                                lifecycleScope.launch {
+//                                    googleAuthUiClient.signOut()
+//                                    Toast.makeText(applicationContext, "Signed out", Toast.LENGTH_LONG).show()
+//                                    navController.popBackStack()
+//                                }
+//                            }
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        try {
+//            unregisterReceiver(networkChangeReceiver)
+//        } catch (e: IllegalArgumentException) {
+//            // Receiver chưa được đăng ký
+//        }
+//    }
+//}

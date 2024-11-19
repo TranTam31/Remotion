@@ -87,12 +87,27 @@ class NoteViewModel(
                     emotion = 0
                 ) }
             }
+            is NoteEvent.DeleteNote -> {
+                viewModelScope.launch {
+                    noteRepository.deleteNote(event.note)
+                }
+            }
+            is NoteEvent.UpdateNote -> {
+                viewModelScope.launch {
+                    noteRepository.updateNote(event.note)
+                }
+            }
         }
     }
 
     fun check(date: LocalDate): Boolean {
         // Kiểm tra nếu ngày đã tồn tại trong danh sách _notes
         return _notes.value.any { it.date == date }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getNoteByDate(date: LocalDate) : Note? {
+        return state.value.notes.find { it.date == date }
     }
 
     fun clearRoomDataForNewUser() {
