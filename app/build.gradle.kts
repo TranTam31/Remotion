@@ -101,4 +101,10 @@ dependencies {
 
     // coil
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(kotlin("script-runtime"))
+
+    // time picker
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.6")
 }
