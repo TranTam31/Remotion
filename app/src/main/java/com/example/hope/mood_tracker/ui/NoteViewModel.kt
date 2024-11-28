@@ -60,7 +60,9 @@ class NoteViewModel(
             }
             NoteEvent.HideDialog -> {
                 _state.update { it.copy(
-                    isAddingNote = false
+                    isAddingNote = false,
+                    content = "",
+                    emotion = 0
                 ) }
             }
 
