@@ -12,7 +12,7 @@ interface TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTaskDay(taskDay: TaskDay)
 
-    @Query("SELECT * FROM TaskDay WHERE date = :date")
+    @Query("SELECT * FROM TaskDay WHERE date = :date ORDER BY isCompleted ASC, time ASC")
     suspend fun getTaskDayByDate(date: LocalDate): List<TaskDay>
     @Query("SELECT * FROM Task WHERE taskId = :taskId")
     suspend fun getTaskById(taskId: Long): Task
@@ -32,4 +32,7 @@ interface TaskDao {
 
     @Query("UPDATE TaskDay SET isCompleted = NOT isCompleted WHERE occurrenceId = :occurrenceId")
     suspend fun toggleIsCompleted(occurrenceId: Long)
+
+    @Update
+    suspend fun updateTaskDay(taskDay: TaskDay)
 }

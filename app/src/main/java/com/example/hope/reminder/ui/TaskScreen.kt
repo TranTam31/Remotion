@@ -110,10 +110,9 @@ fun TaskScreen(viewModel: TaskViewModel) {
                     taskList = viewModel.getTaskByDate(state.dateSelected)
                 }
 
-
                 TaskList(
                     tasks = taskList,
-                    onEvent = onEvent
+                    viewModel = viewModel
                 )
             }
         }

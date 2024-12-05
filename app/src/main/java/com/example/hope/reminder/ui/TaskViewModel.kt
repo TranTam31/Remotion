@@ -213,6 +213,7 @@ class TaskViewModel(
                         )
                     }
                 }
+
                 _state.update {
                     it.copy(
                         isAddingTask = false,
@@ -245,6 +246,18 @@ class TaskViewModel(
             is TaskEvent.DeleteTask -> {
                 viewModelScope.launch {
                     taskRepository.deleteTask(event.task)
+                }
+            }
+
+            is TaskEvent.UpdateTaskDay -> {
+                viewModelScope.launch {
+                    taskRepository.updateTaskDay(event.taskDay)
+                }
+                _state.update {
+                    it.copy(
+                        time = null,
+                        content = ""
+                    )
                 }
             }
 

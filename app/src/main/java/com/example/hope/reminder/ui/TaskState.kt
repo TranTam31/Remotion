@@ -12,11 +12,11 @@ import java.time.LocalTime
 data class TaskState (
     val tasks: List<TaskDay> = emptyList(),
     val title: String = "",
-    val content: String = "",
+    var content: String? = "",
     val repeatOption: RepeatOption = RepeatOption.NONE,
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
-    val time: LocalTime? = null,
+    var time: LocalTime? = null,
     val isAddingTask: Boolean = false,
     val dateSelected: LocalDate = LocalDate.now(),
     val selectedDaysOfWeek: Set<Int> = emptySet() // Thêm mảng lưu các ngày đã chọn

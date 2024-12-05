@@ -1,6 +1,7 @@
 package com.example.hope.reminder.ui.components
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -36,6 +37,7 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
@@ -44,13 +46,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import com.example.hope.reminder.data.database.Task
 import com.example.hope.reminder.ui.TaskEvent
+import com.example.hope.reminder.ui.TaskViewModel
 import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskList(
     tasks: List<Pair<Task, TaskDay>>,
-    onEvent: (TaskEvent) -> Unit
+    viewModel: TaskViewModel
 ) {
     if (tasks.isEmpty()) {
         Text(
@@ -62,7 +65,7 @@ fun TaskList(
             items(tasks) { task ->
                 TaskItem(
                     task,
-                    onEvent = onEvent
+                    viewModel = viewModel
                 )
             }
         }
@@ -76,8 +79,11 @@ fun TaskList(
 @Composable
 fun TaskItem(
     task: Pair<Task, TaskDay>,
-    onEvent: (TaskEvent) -> Unit
+    viewModel: TaskViewModel
 ) {
+    val state = viewModel.state.collectAsState()
+    val onEvent = viewModel::onEvent
+
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var taskChoose by remember { mutableStateOf<Task?>(null) }
@@ -87,25 +93,24 @@ fun TaskItem(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Xóa công việc") },
-            text = { Text("Bạn có chắc chắn muốn xóa ${taskDayChoose?.content} này?") },
+            title = { Text("Xóa Task") },
+            text = {
+                Text("Bạn có chắc chắn muốn xóa Task này?")
+            },
             confirmButton = {
-                TextButton(onClick = {
-                    taskDayChoose?.let { TaskEvent.DeleteTaskDay(it) }?.let { onEvent(it) }
-                    showDeleteDialog = false
-                }) {
-                    Text("Xóa TaskDay")
-                }
+            },
+            dismissButton = {
                 TextButton(onClick = {
                     taskChoose?.let { TaskEvent.DeleteTask(it) }?.let { onEvent(it) }
                     showDeleteDialog = false
                 }) {
                     Text("Xóa Task chung")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Hủy")
+                TextButton(onClick = {
+                    taskDayChoose?.let { TaskEvent.DeleteTaskDay(it) }?.let { onEvent(it) }
+                    showDeleteDialog = false
+                }) {
+                    Text("Xóa Task này")
                 }
             }
         )
@@ -113,27 +118,52 @@ fun TaskItem(
 
     // Dialog chỉnh sửa task
     if (showEditDialog) {
+
         AlertDialog(
-            onDismissRequest = { showEditDialog = false },
-            title = { Text("Chỉnh sửa công việc") },
+            onDismissRequest = {
+                showEditDialog = false
+                onEvent(TaskEvent.SetTime(null))
+                onEvent(TaskEvent.SetContent(""))
+            },
+            title = { Text("Chi tiết Task") },
             text = {
                 Column {
-                    Text("Chỉnh sửa nội dung hoặc giờ của công việc")
-                    // Thêm TextField nếu cần để chỉnh sửa task
+                    EditTaskDay(
+                        time = task.second.time,
+                        content = task.second.content,
+                        viewModel = viewModel
+                    )
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
-//                    onEdit()
+                    // không hiểu tại sao như này thì không được nha
+
+//                    if(state.value.time == null) {
+//                        onEvent(TaskEvent.SetTime(task.second.time))
+//                        Log.d("state time sau", "${state.value.time}, ${task.second.time}")
+//                    }
+//                    if(state.value.content.isNullOrBlank()) {
+//                        onEvent(TaskEvent.SetContent(task.second.content))
+//                    }
+
+                    // phải đẩy vào như này, như kiểu là nó bị bất đồng bộ ý??
+
+                    val taskDayUpdate = task.second.copy(
+                        time = state.value.time ?: task.second.time,
+                        content = if (state.value.content?.isNotBlank() == true) {
+                            state.value.content
+                        } else {
+                            task.second.content
+                        }
+                    )
+                    onEvent(TaskEvent.UpdateTaskDay(taskDayUpdate))
                     showEditDialog = false
                 }) {
                     Text("Lưu")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEditDialog = false }) {
-                    Text("Hủy")
-                }
             }
         )
     }

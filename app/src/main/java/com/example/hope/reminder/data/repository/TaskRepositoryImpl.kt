@@ -44,4 +44,8 @@ class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
     override suspend fun toggleIsCompleted(taskDayId: Long) {
         return taskDao.toggleIsCompleted(taskDayId)
     }
+
+    override suspend fun updateTaskDay(taskDay: TaskDay) {
+        taskDao.updateTaskDay(taskDay)
+    }
 }

@@ -15,4 +15,5 @@ interface TaskRepository {
     suspend fun countTaskDaysByTaskId(taskId: Long): Int
     suspend fun deleteTask(task: Task)
     suspend fun toggleIsCompleted(taskDayId: Long)
+    suspend fun updateTaskDay(taskDay: TaskDay)
 }
