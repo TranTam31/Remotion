@@ -42,9 +42,6 @@ import java.time.YearMonth
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NoteScreen(
-//    state: NoteState,
-//    onEvent: (NoteEvent) -> Unit,
-//    check: (LocalDate) -> Boolean,
     noteViewModel: NoteViewModel
 ) {
     val state: NoteState by noteViewModel.state.collectAsState()

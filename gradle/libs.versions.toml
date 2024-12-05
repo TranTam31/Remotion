@@ -1,4 +1,5 @@
 [versions]
+accompanistSwipetodismiss = "0.29.0-alpha"
 agp = "8.6.0"
 coreSplashscreen = "1.0.1"
 kotlin = "1.9.0"
@@ -12,6 +13,7 @@ composeBom = "2024.04.01"
 firebaseAuth = "23.1.0"
 
 [libraries]
+accompanist-swipetodismiss = { module = "com.google.accompanist:accompanist-swipetodismiss", version.ref = "accompanistSwipetodismiss" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

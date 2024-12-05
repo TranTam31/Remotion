@@ -9,11 +9,11 @@ import com.example.hope.mood_tracker.data.database.Note
 import com.example.hope.mood_tracker.data.database.NoteDao
 import com.example.hope.reminder.data.database.Task
 import com.example.hope.reminder.data.database.TaskDao
-import com.example.hope.reminder.data.database.TaskOccurrence
+import com.example.hope.reminder.data.database.TaskDay
 
 @Database(
-    entities = [Note::class, Task::class, TaskOccurrence::class],
-    version = 6
+    entities = [Note::class, Task::class, TaskDay::class],
+    version = 7
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {

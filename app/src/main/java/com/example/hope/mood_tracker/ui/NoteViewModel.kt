@@ -25,6 +25,7 @@ class NoteViewModel(
 
     private val _notes = noteRepository.getAllNotes()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+
     @RequiresApi(Build.VERSION_CODES.O)
     private val _state = MutableStateFlow(NoteState())
 
