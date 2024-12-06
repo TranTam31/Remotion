@@ -148,14 +148,19 @@ fun TaskItem(
 //                    }
 
                     // phải đẩy vào như này, như kiểu là nó bị bất đồng bộ ý??
+//                    val taskDayUpdate = task.second.copy(
+//                        time = state.value.time ?: task.second.time,
+//                        content = if (state.value.content?.isNotBlank() == true) {
+//                            state.value.content
+//                        } else {
+//                            task.second.content
+//                        }
+//                    )
 
+//                  ủa nhưng mà:))), fix được rồi:))))
                     val taskDayUpdate = task.second.copy(
-                        time = state.value.time ?: task.second.time,
-                        content = if (state.value.content?.isNotBlank() == true) {
-                            state.value.content
-                        } else {
-                            task.second.content
-                        }
+                        time = state.value.time,
+                        content = state.value.content
                     )
                     onEvent(TaskEvent.UpdateTaskDay(taskDayUpdate))
                     showEditDialog = false
