@@ -1,13 +1,20 @@
 package com.example.hope.reminder.data.repository
 
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.hope.reminder.data.database.Task
 import com.example.hope.reminder.data.database.TaskDao
 import com.example.hope.reminder.data.database.TaskDay
+import com.example.hope.reminder.notification.setTaskAlarm
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.time.LocalDate
 
-class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
+class TaskRepositoryImpl(
+    private val taskDao: TaskDao,
+    private val context: Context
+) : TaskRepository {
 
     override fun getAllTasks(): Flow<List<TaskDay>> {
         return taskDao.getAllTasks()
@@ -25,8 +32,12 @@ class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
         return taskDao.insertTask(task)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun insertTaskDay(taskDay: TaskDay) {
         taskDao.insertTaskDay(taskDay)
+        taskDay.time?.let { _ ->
+            setTaskAlarm(taskDay, context)
+        }
     }
 
     override suspend fun deleteTaskDay(taskDay: TaskDay) {

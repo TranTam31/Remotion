@@ -1,6 +1,7 @@
 package com.example.hope
 
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
@@ -45,6 +46,8 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var networkChangeReceiver: NetworkChangeReceiver
     private val noteViewModel: NoteViewModel by viewModels(factoryProducer = { Factory })
+
+    private lateinit var sharedPreferences: SharedPreferences
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
