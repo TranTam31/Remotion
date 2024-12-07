@@ -23,7 +23,7 @@ import java.time.YearMonth
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarView(
-    check: (LocalDate) -> Boolean,
+    getEmotion: (LocalDate) -> Int,
     currentMonth: YearMonth,
     today: LocalDate,
     onDateSelected: (LocalDate) -> Unit
@@ -50,11 +50,11 @@ fun CalendarView(
         }
 
         items(daysInMonth) { date ->
-            val isSelected = check(date)
+            val emotion = getEmotion(date)
             val isFutureDate = date > today
             DayView(
                 date = date,
-                isSelected = isSelected,
+                emotion = emotion,
                 isFutureDate = isFutureDate,
                 onClick = { if (!isFutureDate) onDateSelected(date) }
             )

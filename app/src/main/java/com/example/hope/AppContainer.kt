@@ -31,6 +31,6 @@ class AppDataContainer(private val context: Context): AppContainer {
     }
 
     override val taskRepository: TaskRepository by lazy {
-        TaskRepositoryImpl(AppDatabase.getDatabase(context).taskDao)
+        TaskRepositoryImpl(AppDatabase.getDatabase(context).taskDao, context)
     }
 }

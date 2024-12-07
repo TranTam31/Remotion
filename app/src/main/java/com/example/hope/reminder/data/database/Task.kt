@@ -26,9 +26,9 @@ data class Task(
         onDelete = CASCADE // Khi xóa Task, tự động xóa các TaskOccurrence liên quan
     )]
 )
-data class TaskOccurrence(
+data class TaskDay(
     @PrimaryKey(autoGenerate = true)
-    val occurrenceId: Long = 0,
+    val taskDayId: Long = 0,
     val taskId: Long, // Liên kết tới Task
     val date: LocalDate,   // Ngày xuất hiện (timestamp)
     val time: LocalTime?, // Giờ thực hiện (có thể null nếu không cần giờ cụ thể)
