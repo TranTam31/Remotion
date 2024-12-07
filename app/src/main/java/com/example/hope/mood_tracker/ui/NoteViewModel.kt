@@ -103,9 +103,10 @@ class NoteViewModel(
         }
     }
 
-    fun check(date: LocalDate): Boolean {
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getEmotion(date: LocalDate): Int {
         // Kiểm tra nếu ngày đã tồn tại trong danh sách _notes
-        return _notes.value.any { it.date == date }
+        return state.value.notes.find { it.date == date }?.emotion ?: 0
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

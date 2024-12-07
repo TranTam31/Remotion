@@ -3,40 +3,50 @@ package com.example.hope.mood_tracker.ui
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.hope.mood_tracker.data.Emotions
 import com.example.hope.mood_tracker.ui.components.CalendarView
 import com.example.hope.mood_tracker.ui.components.JournalEntryInput
 import com.example.hope.mood_tracker.ui.components.MonthPickerDialog
 import com.example.hope.mood_tracker.ui.components.MonthSelector
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.TextStyle
+import java.util.Locale
 
 @SuppressLint("ReturnFromAwaitPointerEventScope")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -46,7 +56,7 @@ fun NoteScreen(
 ) {
     val state: NoteState by noteViewModel.state.collectAsState()
     val onEvent = noteViewModel::onEvent
-    val check = noteViewModel::check
+    val getEmotion = noteViewModel::getEmotion
     val getNoteByDate = noteViewModel::getNoteByDate
 
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
@@ -63,7 +73,7 @@ fun NoteScreen(
                 onClick = {
                     onEvent(NoteEvent.SetDate(today))
                     onEvent(NoteEvent.ShowDialog)
-                    isViewingEntry = check(today)
+                    isViewingEntry = getEmotion(today) != 0
                 }
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add")
@@ -136,16 +146,16 @@ fun NoteScreen(
                     })
             ) {
                 CalendarView(
-                    check = check,
+                    getEmotion = getEmotion,
                     currentMonth = currentMonth,
                     today = today,
                     onDateSelected = { date ->
                         if (date <= today) {
                             onEvent(NoteEvent.SetDate(date))
                             onEvent(NoteEvent.ShowDialog)
-                            isViewingEntry = check(date)
+                            isViewingEntry = getEmotion(date) != 0
                         }
-                    }
+                    },
                 )
             }
 
@@ -164,7 +174,10 @@ fun NoteScreen(
             if (state.isAddingNote) {
                 val note = getNoteByDate(state.date)
                 AlertDialog(
-                    onDismissRequest = { onEvent(NoteEvent.HideDialog) },
+                    onDismissRequest = {
+                        onEvent(NoteEvent.HideDialog)
+                        isEditingNote = false
+                    },
                     title = {
                         Text(text = if (isViewingEntry && !isEditingNote) "Xem nhật ký"
                                     else if(!isEditingNote) "Thêm nhật ký"
@@ -174,8 +187,46 @@ fun NoteScreen(
                     text = {
                         if (isViewingEntry && !isEditingNote) {
                             // Chế độ xem nhật ký
-                            note?.content?.let { Text(text = it) }
-                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(4.dp), // Thêm padding xung quanh Column
+                                horizontalAlignment = Alignment.CenterHorizontally, // Căn giữa nội dung theo chiều ngang
+                                verticalArrangement = Arrangement.Center // Căn giữa nội dung theo chiều dọc
+                            ) {
+
+                                note?.date?.let {
+                                    Text(
+                                        text = "${it.dayOfMonth} ${it.month.getDisplayName(TextStyle.FULL, Locale.getDefault())}",
+                                        style = MaterialTheme.typography.bodyLarge, // Chọn kiểu chữ phù hợp
+                                        modifier = Modifier
+                                            .padding(end = 16.dp) // Cách văn bản một chút với hình ảnh
+                                            .align(Alignment.Start) // Căn giữa văn bản
+                                    )
+                                }
+                                note?.emotion?.let {
+                                    val imageResource = Emotions.images[it - 1]
+                                    Image(
+                                        painter = painterResource(id = imageResource),
+                                        contentDescription = "Emotion $it",
+                                        modifier = Modifier
+                                            .size(100.dp) // Tăng kích thước hình ảnh để dễ nhìn hơn
+                                            .padding(4.dp) // Thêm padding cho hình ảnh
+                                    )
+                                }
+
+                                note?.content?.let {
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.bodyLarge, // Chọn kiểu chữ phù hợp
+                                        modifier = Modifier
+                                            .padding(top = 16.dp) // Cách văn bản một chút với hình ảnh
+                                            .align(Alignment.CenterHorizontally) // Căn giữa văn bản
+                                    )
+                                }
+                            }
+                        }
+                        else {
                             // Chế độ thêm hoặc chỉnh sửa nhật ký
                             JournalEntryInput(
                                 date = state.date,
@@ -207,12 +258,6 @@ fun NoteScreen(
                         }
                     },
                     confirmButton = {
-                        TextButton(onClick = {
-                            onEvent(NoteEvent.HideDialog)
-                            isEditingNote = false
-                        }) {
-                            Text("Đóng")
-                        }
                     },
                     dismissButton = {
                         if (isViewingEntry && !isEditingNote) {

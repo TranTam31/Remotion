@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DrawerValue
@@ -52,6 +55,7 @@ import com.example.hope.other.ui.InstructScreen
 import com.example.hope.other.ui.SettingScreen
 import com.example.hope.mood_tracker.NoteApp
 import com.example.hope.navigation.Destinations
+import com.example.hope.other.ui.AnaScreen
 import com.example.hope.reminder.ReminderApp
 import kotlinx.coroutines.launch
 
@@ -81,8 +85,14 @@ fun RemotionApp(
         BottomNavItem(
             title = "Tracker",
             selectedIcon = Icons.Filled.Favorite,
-            unselectedIcon = Icons.Outlined.Favorite,
+            unselectedIcon = Icons.Outlined.FavoriteBorder,
             destination = Destinations.NOTE_APP
+        ),
+        BottomNavItem(
+            title = "Analyst",
+            selectedIcon = Icons.Filled.CheckCircle,
+            unselectedIcon = Icons.Outlined.CheckCircle,
+            destination = Destinations.ANA_SCREEN
         ),
         BottomNavItem(
             title = "Reminder",
@@ -159,10 +169,13 @@ fun RemotionApp(
                 modifier = Modifier.padding(padding)
             ) {
                 composable(Destinations.NOTE_APP) {
-                    NoteApp() // NoteApp will be shown here
+                    NoteApp()
+                }
+                composable(Destinations.ANA_SCREEN) {
+                    AnaScreen()
                 }
                 composable(Destinations.REMINDER_APP) {
-                    ReminderApp() // ReminderApp will be shown here
+                    ReminderApp()
                 }
                 composable(Destinations.PROFILE_APP) {
                     ProfileApp(userData = userData, onSignOut = onSignOut)

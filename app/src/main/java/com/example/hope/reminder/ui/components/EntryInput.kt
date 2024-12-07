@@ -315,6 +315,7 @@ fun EntryInput(
                                     viewModel.onEvent(TaskEvent.SetSelectedDaysOfWeek(newSelectedDays))
                                 }
                                 .padding(8.dp)
+                                .weight(1f)
                         ) {
                             Text(
                                 text = daysOfWeek[index],
