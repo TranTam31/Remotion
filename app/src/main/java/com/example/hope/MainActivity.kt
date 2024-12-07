@@ -1,5 +1,6 @@
 package com.example.hope
 
+import android.content.Context
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
@@ -54,6 +55,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         enableEdgeToEdge()
+
+        // khởi tạo biến lateinit
+        sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
         // chỗ này để gọi hàm đồng bộ khi có mạng
         if (googleAuthUiClient.getSignedInUser() != null) {

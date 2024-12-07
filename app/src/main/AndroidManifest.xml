@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application
         android:name=".NoteApplication"
         android:allowBackup="true"
@@ -18,6 +20,8 @@
         <receiver android:name=".reminder.notification.DismissNotificationReceiver" android:exported="false" />
         <receiver android:name=".reminder.notification.TaskAlarmReceiver" android:exported="false" />
 
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -29,6 +33,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".reminder.notification.AlarmActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <!-- Optional: bạn có thể thêm cờ intent-filter nếu cần -->
+        </activity>
+
     </application>
 
 </manifest>
