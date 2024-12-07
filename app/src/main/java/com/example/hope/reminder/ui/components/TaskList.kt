@@ -1,7 +1,6 @@
 package com.example.hope.reminder.ui.components
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -30,10 +29,8 @@ import com.example.hope.reminder.data.database.TaskDay
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.LaunchedEffect
@@ -263,7 +260,7 @@ fun TaskItem(
                     Checkbox(
                         checked = task.second.isCompleted,
                         onCheckedChange = {
-                            onEvent(TaskEvent.ToggleIsCompleted(task.second.occurrenceId))
+                            onEvent(TaskEvent.ToggleIsCompleted(task.second.taskDayId))
                         },
                         modifier = Modifier.size(42.dp)
                     )

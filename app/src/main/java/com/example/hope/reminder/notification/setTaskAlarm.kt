@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.example.hope.reminder.data.database.TaskDao
 import com.example.hope.reminder.data.database.TaskDay
 import java.time.Duration
 import java.time.LocalDateTime
@@ -14,14 +15,15 @@ import java.time.LocalTime
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("ServiceCast", "ScheduleExactAlarm")
-fun setTaskAlarm(taskDay: TaskDay, context: Context) {
+suspend fun setTaskAlarm(taskDay: TaskDay, context: Context, taskDao: TaskDao) {
+
+    val task = taskDao.getTaskById(taskDay.taskId)
 
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     val intent = Intent(context, TaskAlarmReceiver::class.java).apply {
-        putExtra("taskId", taskDay.taskId)
-        putExtra("title", "Task: ${taskDay.taskId}") // Ví dụ title
+        putExtra("taskDayId", taskDay.taskDayId)
+        putExtra("title", "Task: ${task.title}") // Ví dụ title
         putExtra("content", taskDay.content ?: "No content")
-        putExtra("time", taskDay.time?.toString() ?: "")
     }
 
     val pendingIntent = PendingIntent.getBroadcast(
@@ -45,3 +47,19 @@ fun setTaskAlarm(taskDay: TaskDay, context: Context) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+fun cancelTaskAlarm(taskDay: TaskDay, context: Context) {
+    // Hủy thông báo
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, TaskAlarmReceiver::class.java).apply {
+        putExtra("taskId", taskDay.taskId)
+    }
+    val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        taskDay.taskId.toInt(),
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    alarmManager.cancel(pendingIntent)
+}

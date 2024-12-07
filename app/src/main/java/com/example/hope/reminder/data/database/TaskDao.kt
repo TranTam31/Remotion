@@ -17,11 +17,11 @@ interface TaskDao {
     @Query("SELECT * FROM Task WHERE taskId = :taskId")
     suspend fun getTaskById(taskId: Long): Task
 
+    @Query("SELECT * FROM TaskDay WHERE taskDayId = :taskDayId")
+    suspend fun getTaskDayById(taskDayId: Long): TaskDay
+
     @Query("SELECT * FROM TaskDay")
     fun getAllTasks(): Flow<List<TaskDay>>
-
-//    @Query("SELECT * FROM TaskDay")
-//    suspend fun getAllTaskDays(): List<TaskDay>
     
     @Delete
     suspend fun deleteTaskDay(taskDay: TaskDay)
@@ -30,8 +30,8 @@ interface TaskDao {
     @Delete
     suspend fun deleteTask(task: Task)
 
-    @Query("UPDATE TaskDay SET isCompleted = NOT isCompleted WHERE occurrenceId = :occurrenceId")
-    suspend fun toggleIsCompleted(occurrenceId: Long)
+    @Query("UPDATE TaskDay SET isCompleted = NOT isCompleted WHERE taskDayId = :taskDayId")
+    suspend fun toggleIsCompleted(taskDayId: Long)
 
     @Update
     suspend fun updateTaskDay(taskDay: TaskDay)

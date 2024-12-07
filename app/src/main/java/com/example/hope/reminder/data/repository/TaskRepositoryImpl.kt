@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import com.example.hope.reminder.data.database.Task
 import com.example.hope.reminder.data.database.TaskDao
 import com.example.hope.reminder.data.database.TaskDay
+import com.example.hope.reminder.notification.cancelTaskAlarm
 import com.example.hope.reminder.notification.setTaskAlarm
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -36,12 +37,14 @@ class TaskRepositoryImpl(
     override suspend fun insertTaskDay(taskDay: TaskDay) {
         taskDao.insertTaskDay(taskDay)
         taskDay.time?.let { _ ->
-            setTaskAlarm(taskDay, context)
+            setTaskAlarm(taskDay, context, taskDao)
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun deleteTaskDay(taskDay: TaskDay) {
         taskDao.deleteTaskDay(taskDay)
+        cancelTaskAlarm(taskDay, context)
     }
 
     override suspend fun deleteTask(task: Task) {
@@ -52,11 +55,23 @@ class TaskRepositoryImpl(
         return taskDao.countTaskDaysByTaskId(taskId)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun toggleIsCompleted(taskDayId: Long) {
+        val taskDay = taskDao.getTaskDayById(taskDayId)
+        if (taskDay.isCompleted) {
+            setTaskAlarm(taskDay,context, taskDao)
+        } else {
+            cancelTaskAlarm(taskDay, context)
+        }
         return taskDao.toggleIsCompleted(taskDayId)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun updateTaskDay(taskDay: TaskDay) {
         taskDao.updateTaskDay(taskDay)
+        cancelTaskAlarm(taskDay, context)
+        taskDay.time?.let { _ ->
+            setTaskAlarm(taskDay, context, taskDao)
+        }
     }
 }

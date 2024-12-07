@@ -13,7 +13,7 @@ import com.example.hope.reminder.data.database.TaskDay
 
 @Database(
     entities = [Note::class, Task::class, TaskDay::class],
-    version = 7
+    version = 8
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {
