@@ -115,7 +115,8 @@ dependencies {
     // Espresso
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.6.1")
 
-    //testImplementation ("org.mockito:mockito-core:4.0.0")
-    //testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
-    //testImplementation ("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation ("org.mockito:mockito-core:4.0.0")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation ("com.google.truth:truth:1.1.5")
 }
