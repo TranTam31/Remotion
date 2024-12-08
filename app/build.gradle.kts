@@ -107,4 +107,15 @@ dependencies {
     implementation("com.google.android.material:material:1.9.0")
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.6")
+
+    // UI Automator
+    androidTestImplementation ("androidx.test.uiautomator:uiautomator:2.3.0")
+
+
+    // Espresso
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.6.1")
+
+    //testImplementation ("org.mockito:mockito-core:4.0.0")
+    //testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
+    //testImplementation ("org.mockito.kotlin:mockito-kotlin:5.0.0")
 }
