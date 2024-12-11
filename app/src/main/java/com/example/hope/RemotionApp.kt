@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Settings
@@ -47,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.hope.auth.ui.sign_in.ProfileApp
 import com.example.hope.auth.ui.sign_in.UserData
@@ -55,7 +55,10 @@ import com.example.hope.other.ui.InstructScreen
 import com.example.hope.other.ui.SettingScreen
 import com.example.hope.mood_tracker.NoteApp
 import com.example.hope.navigation.Destinations
-import com.example.hope.other.ui.AnaScreen
+import com.example.hope.analyst.ui.AnaScreen
+import com.example.hope.analyst.ui.ChartScreen
+import com.example.hope.analyst.ui.MultipleChoiceScreen
+import com.example.hope.analyst.ui.VoiceScreen
 import com.example.hope.reminder.ReminderApp
 import kotlinx.coroutines.launch
 
@@ -80,6 +83,8 @@ fun RemotionApp(
 
     // Để lưu trạng thái mục đã chọn
     var selectedDestination by remember { mutableStateOf(Destinations.NOTE_APP) }
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = currentBackStackEntry?.destination?.route
 
     val items = listOf(
         BottomNavItem(
@@ -133,19 +138,31 @@ fun RemotionApp(
                         }
                     },
                     onClickAccount = {
-                        selectedDestination = Destinations.PROFILE_APP
-                        navController.navigate(Destinations.PROFILE_APP)
+                        if (selectedDestination != Destinations.PROFILE_APP) {
+                            selectedDestination = Destinations.PROFILE_APP
+                            navController.navigate(Destinations.PROFILE_APP) {
+                                // Đảm bảo không thêm destination mới vào back stack nếu đã có
+                                launchSingleTop = true
+                            }
+                        }
                     }
+
                 )
             },
             bottomBar = {
                 NavigationBar {
-                    items.forEachIndexed{index, item ->
+                    items.forEachIndexed { index, item ->
                         NavigationBarItem(
-                            selected = selectedDestination == item.destination,
+                            selected = currentDestination == item.destination,
                             onClick = {
-                                selectedDestination = item.destination
-                                navController.navigate(item.destination)
+                                // Chỉ điều hướng nếu destination khác hiện tại
+                                if (selectedDestination != item.destination) {
+                                    selectedDestination = item.destination
+                                    navController.navigate(item.destination) {
+                                        // Đảm bảo không thêm destination mới vào back stack nếu đã có
+                                        launchSingleTop = true
+                                    }
+                                }
                             },
                             alwaysShowLabel = false,
                             label = {
@@ -153,7 +170,7 @@ fun RemotionApp(
                             },
                             icon = {
                                 Icon(
-                                    imageVector = if(selectedDestination == item.destination) item.selectedIcon
+                                    imageVector = if (currentDestination == item.destination) item.selectedIcon
                                     else item.unselectedIcon,
                                     contentDescription = null
                                 )
@@ -162,6 +179,7 @@ fun RemotionApp(
                     }
                 }
             }
+
         ) { padding ->
             NavHost(
                 navController = navController,
@@ -172,7 +190,7 @@ fun RemotionApp(
                     NoteApp()
                 }
                 composable(Destinations.ANA_SCREEN) {
-                    AnaScreen()
+                    AnaScreen(navController)
                 }
                 composable(Destinations.REMINDER_APP) {
                     ReminderApp()
@@ -188,6 +206,15 @@ fun RemotionApp(
                 }
                 composable(Destinations.INSTRUCT_SCREEN) {
                     InstructScreen()
+                }
+                composable(Destinations.MPC_SCREEN) {
+                    MultipleChoiceScreen()
+                }
+                composable(Destinations.VOICE_SCREEN) {
+                    VoiceScreen()
+                }
+                composable(Destinations.CHART_SCREEN) {
+                    ChartScreen()
                 }
             }
         }
