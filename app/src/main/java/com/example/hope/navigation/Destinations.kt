@@ -8,4 +8,7 @@ object Destinations {
     const val SETTING_SCREEN = "setting_screen"
     const val INFO_SCREEN = "info_screen"
     const val INSTRUCT_SCREEN = "instruct_screen"
+    const val MPC_SCREEN = "mpc_screen"
+    const val VOICE_SCREEN = "voice_screen"
+    const val CHART_SCREEN = "chart_screen"
 }
