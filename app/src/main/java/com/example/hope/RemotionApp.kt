@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -59,6 +60,9 @@ import com.example.hope.analyst.ui.AnaScreen
 import com.example.hope.analyst.ui.ChartScreen
 import com.example.hope.analyst.ui.MultipleChoiceScreen
 import com.example.hope.analyst.ui.VoiceScreen
+import com.example.hope.dass21.ui.form.ResultScreen
+import com.example.hope.dass21.ui.form.StressAnxietyDepressionForm
+import com.example.hope.dass21.ui.viewmodel.SurveyViewModel
 import com.example.hope.reminder.ReminderApp
 import kotlinx.coroutines.launch
 
@@ -80,6 +84,7 @@ fun RemotionApp(
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val surveyViewModel: SurveyViewModel = viewModel()
 
     // Để lưu trạng thái mục đã chọn
     var selectedDestination by remember { mutableStateOf(Destinations.NOTE_APP) }
@@ -208,13 +213,27 @@ fun RemotionApp(
                     InstructScreen()
                 }
                 composable(Destinations.MPC_SCREEN) {
-                    MultipleChoiceScreen()
+                    StressAnxietyDepressionForm(viewModel = surveyViewModel,
+                        onHomeBack = {},// Trở về màn hình chính
+                        onSubmit = {
+                            navController.navigate("result")
+                        })
                 }
                 composable(Destinations.VOICE_SCREEN) {
                     VoiceScreen()
                 }
                 composable(Destinations.CHART_SCREEN) {
                     ChartScreen()
+                }
+//                composable("form") {
+//
+//                }
+                composable("result") {
+                    ResultScreen(
+                        resultResponse = surveyViewModel.resultResponse.value,
+                        onNextStage = { navController.navigate(Destinations.MPC_SCREEN) },
+                        onReturnHome = {navController.navigate(Destinations.ANA_SCREEN)}
+                    )
                 }
             }
         }

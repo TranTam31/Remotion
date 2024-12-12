@@ -107,4 +107,14 @@ dependencies {
     implementation("com.google.android.material:material:1.9.0")
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.6")
+
+    //DASS21
+    implementation("com.squareup.retrofit2:retrofit:2.9.0") // Thay thế phiên bản cụ thể của Retrofit
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0") // Gson converter
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0") // ViewModel Compose (thay thế bằng phiên bản cụ thể nếu khác)
+    implementation("androidx.activity:activity-compose:1.6.0") // Activity Compose
+    implementation("com.squareup.okhttp3:okhttp:4.10.0") // OkHttp
+    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0") // Logging Interceptor
+
 }
