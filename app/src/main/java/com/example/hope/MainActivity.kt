@@ -156,7 +156,10 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // Hủy đăng ký BroadcastReceiver khi Activity bị hủy
-        unregisterReceiver(networkChangeReceiver)
+        if(::networkChangeReceiver.isInitialized){
+            unregisterReceiver(networkChangeReceiver)
+        }
+//        unregisterReceiver(networkChangeReceiver)
     }
 
 }
