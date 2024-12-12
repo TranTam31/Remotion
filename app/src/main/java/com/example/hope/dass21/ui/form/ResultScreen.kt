@@ -1,5 +1,6 @@
 package com.example.hope.dass21.ui.form
 
+import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -19,7 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.hope.dass21.data.model.ResultResponse
 
 
@@ -45,7 +49,7 @@ fun ResultScreen(
             item {
                 if (resultResponse != null) {
                     ResultCard(
-                        title = "Anxiety Score",
+                        title = "Chỉ số lo âu",
                         score = resultResponse.anxiety_score.toInt(),
                         message = getAnxietyMessage(resultResponse.anxiety_score.toInt())
                     )
@@ -54,7 +58,7 @@ fun ResultScreen(
             item {
                 if (resultResponse != null) {
                     ResultCard(
-                        title = "Depression Score",
+                        title = "Chỉ số trầm cảm",
                         score = resultResponse.depression_score.toInt(),
                         message = getDepressionMessage(resultResponse.depression_score.toInt())
                     )
@@ -63,7 +67,7 @@ fun ResultScreen(
             item {
                 if (resultResponse != null) {
                     ResultCard(
-                        title = "Stress Score",
+                        title = "Chỉ số stress",
                         score = resultResponse.stress_score.toInt(),
                         message = getStressMessage(resultResponse.stress_score.toInt())
                     )
@@ -78,19 +82,28 @@ fun ResultScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Button(
-                onClick = onNextStage,
-
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = onNextStage,
+                    modifier = Modifier
+                        .weight(1f) // Chia đều không gian
+                        .fillMaxWidth() // Đảm bảo button chiếm toàn bộ phần không gian được cấp
                 ) {
-                Text(text = "Test Again")
+                    Text(text = "Làm lại")
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Button(
+                    onClick = onReturnHome,
+                    modifier = Modifier
+                        .weight(1f) // Chia đều không gian
+                        .fillMaxWidth() // Đảm bảo button chiếm toàn bộ phần không gian được cấp
+                ) {
+                    Text(text = "Quay về")
+                }
             }
 
-            Button(
-                onClick = onReturnHome,
-
-                ) {
-                Text(text = "Return Home")
-            }
         }
     }
 }
@@ -108,17 +121,17 @@ fun ResultCard(title: String, score: Int, message: String) {
         ) {
             Text(
                 text = title,
-
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Score: $score",
-
+                text = "Điểm: $score",
+                modifier = Modifier.padding(top = 6.dp)
                 )
             Text(
                 text = message,
-
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 2.dp)
             )
         }
     }
@@ -127,30 +140,30 @@ fun ResultCard(title: String, score: Int, message: String) {
 // Helper Functions to Get Messages
 fun getAnxietyMessage(score: Int): String {
     return when {
-        score < 8 -> "Your anxiety is normal. Keep maintaining your current lifestyle."
-        score < 10 -> "Mild anxiety. Try to adopt relaxation techniques."
-        score < 15 -> "Moderate anxiety. Consider regular exercise and mindfulness."
-        score < 20 -> "Severe anxiety. Seek professional support if necessary."
-        else -> "Extremely severe anxiety. Consult a mental health professional."
+        score < 8 -> "Mức độ lo âu của bạn là bình thường. Hãy duy trì lối sống hiện tại của bạn."
+        score < 10 -> "Lo âu nhẹ. Hãy thử áp dụng các kỹ thuật thư giãn."
+        score < 15 -> "Lo âu trung bình. Cân nhắc tập thể dục thường xuyên và thực hành chánh niệm."
+        score < 20 -> "Lo âu nghiêm trọng. Hãy tìm sự hỗ trợ chuyên môn nếu cần thiết."
+        else -> "Lo âu cực kỳ nghiêm trọng. Hãy tham khảo ý kiến chuyên gia tâm lý."
     }
 }
 
 fun getDepressionMessage(score: Int): String {
     return when {
-        score < 10 -> "Your depression level is normal. Stay socially active."
-        score < 14 -> "Mild depression. Consider setting small achievable goals."
-        score < 21 -> "Moderate depression. Engage in physical activity and hobbies."
-        score < 28 -> "Severe depression. Connect with a counselor for support."
-        else -> "Extremely severe depression. Seek immediate help."
+        score < 10 -> "Mức độ trầm cảm của bạn là bình thường. Hãy duy trì sự kết nối xã hội."
+        score < 14 -> "Trầm cảm nhẹ. Hãy thử đặt ra những mục tiêu nhỏ có thể đạt được."
+        score < 21 -> "Trầm cảm trung bình. Hãy tham gia các hoạt động thể chất và sở thích cá nhân."
+        score < 28 -> "Trầm cảm nghiêm trọng. Hãy kết nối với một chuyên gia tư vấn để được hỗ trợ."
+        else -> "Trầm cảm cực kỳ nghiêm trọng. Hãy tìm kiếm sự trợ giúp ngay lập tức."
     }
 }
 
 fun getStressMessage(score: Int): String {
     return when {
-        score < 10 -> "Your stress is under control. Keep up your healthy habits."
-        score < 14 -> "Mild stress. Practice meditation and take regular breaks."
-        score < 21 -> "Moderate stress. Spend time in nature and focus on breathing."
-        score < 28 -> "Severe stress. Seek professional advice for stress management."
-        else -> "Extremely severe stress. Immediate intervention is recommended."
+        score < 10 -> "Mức độ căng thẳng của bạn đang được kiểm soát. Hãy duy trì các thói quen lành mạnh."
+        score < 14 -> "Căng thẳng nhẹ. Hãy thực hành thiền và nghỉ ngơi thường xuyên."
+        score < 21 -> "Căng thẳng trung bình. Dành thời gian hòa mình vào thiên nhiên và tập trung vào hơi thở."
+        score < 28 -> "Căng thẳng nghiêm trọng. Hãy tìm lời khuyên từ chuyên gia để quản lý căng thẳng."
+        else -> "Căng thẳng cực kỳ nghiêm trọng. Cần có sự can thiệp ngay lập tức."
     }
 }

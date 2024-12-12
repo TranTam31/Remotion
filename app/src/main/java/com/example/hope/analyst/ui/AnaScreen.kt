@@ -35,17 +35,17 @@ fun AnaScreen(navController: NavController) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         SettingsButton(
-            text = "Multiple Choice",
+            text = "Câu hỏi mức độ căng thẳng",
             onClick = { navController.navigate("mpc_screen") },
             icon = Icons.Default.Face
         )
         SettingsButton(
-            text = "Analyst your emotion",
+            text = "Phân tích cảm xúc",
             onClick = { navController.navigate("voice_screen") },
             icon = Icons.Default.Call
         )
         SettingsButton(
-            text = "Chart",
+            text = "Biểu đồ thống kê",
             onClick = { navController.navigate("chart_screen") },
             icon = Icons.Default.Share
         )

@@ -61,11 +61,12 @@ fun PieChart(
     }
 
     val colors = listOf(
-        Purple80,
-        PurpleGrey80,
-        Pink80,
-        Purple40,
-        Color.Blue
+//        Color(#949e6a),
+        Color(0xFF949E6A),
+        Color(0xFFc0c79b),
+        Color(0xFFf5d894),
+        Color(0XFFdd9e75),
+        Color(0XFFc75a55)
     )
 
     var animationPlayed by remember { mutableStateOf(false) }
