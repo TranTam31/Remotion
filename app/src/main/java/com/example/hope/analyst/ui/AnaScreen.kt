@@ -40,7 +40,7 @@ fun AnaScreen(navController: NavController) {
             icon = Icons.Default.Face
         )
         SettingsButton(
-            text = "Voice",
+            text = "Analyst your emotion",
             onClick = { navController.navigate("voice_screen") },
             icon = Icons.Default.Call
         )
