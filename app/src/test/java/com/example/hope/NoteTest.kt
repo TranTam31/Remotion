@@ -37,7 +37,38 @@ class NoteTest {
         val equal = result.first()
         assertThat(equal).isEqualTo(note)
 
+    }
+    @Test
+    fun insertNote() {
+        val note = Note(
+            userId = "1",
+            emotion = 2,
+            content = "Test content",
+            date = LocalDate.now()
+        )
+        runBlocking {
+            noteRepository.insertNote(note)
+            `when`(noteDao.getNotes(note.userId)).thenReturn(flowOf(listOf(note)))
+            val result = noteDao.getNotes(note.userId).toList().first()
+            val equal = result.first()
+            assertThat(equal).isEqualTo(note)
+        }
+    }
 
-
+    @Test
+    fun updateNote() {
+        val note = Note(
+            userId = "1",
+            emotion = 2,
+            content = "Test content",
+            date = LocalDate.now()
+        )
+        runBlocking {
+            noteRepository.updateNote(note)
+            `when`(noteDao.getNotes(note.userId)).thenReturn(flowOf(listOf(note)))
+            val result = noteDao.getNotes(note.userId).toList().first()
+            val equal = result.first()
+            assertThat(equal).isEqualTo(note)
+        }
     }
 }
