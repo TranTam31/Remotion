@@ -1,5 +1,6 @@
 package com.example.hope
 
+import android.app.Application
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
@@ -79,7 +80,8 @@ data class BottomNavItem(
 fun RemotionApp(
     modifier: Modifier = Modifier,
     userData: UserData?,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    application: Application
 ) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -220,7 +222,7 @@ fun RemotionApp(
                         })
                 }
                 composable(Destinations.VOICE_SCREEN) {
-                    VoiceScreen()
+                    VoiceScreen(application)
                 }
                 composable(Destinations.CHART_SCREEN) {
                     ChartScreen()

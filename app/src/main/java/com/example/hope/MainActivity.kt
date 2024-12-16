@@ -146,7 +146,8 @@ class MainActivity : ComponentActivity() {
                                         popUpTo("remotion_app") { inclusive = true }
                                     }
                                 }
-                            }
+                            },
+                            application = application
                         )
                     }
                 }

@@ -117,4 +117,6 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0") // OkHttp
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0") // Logging Interceptor
 
+    // icon
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
 }

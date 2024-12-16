@@ -32,3 +32,11 @@ data class ResultResponse(
     val stress_score: Double,
     val calculation_success: Boolean
 )
+
+
+data class PredictForm(
+    val text: String
+)
+data class PredictResponse(
+    val predicted_emotion: String
+)
